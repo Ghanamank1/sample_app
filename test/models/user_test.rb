@@ -69,4 +69,8 @@ class UserTest < ActiveSupport::TestCase
     @user.password = @user.password_confirmation = "a"*5
     assert_not @user.valid?, "#{@user.password} is #{@user.password.length} characters and should be invalid"
   end
+
+  test "authenticated? should return false for a user with nil digest" do
+    assert_not @user.authenticated?('')
+  end
 end
