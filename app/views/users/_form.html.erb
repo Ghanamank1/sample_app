@@ -1,0 +1,17 @@
+<%= form_for(@user) do |t| %>
+    <%= render 'shared/error_messages' %>
+
+    <%= t.label(:name, 'Name') %>
+    <%= t.text_field(:name, class: 'form-control') %>
+
+    <%= t.label(:email, 'Email') %>
+    <%= t.email_field(:email, class: 'form-control') %>
+
+    <%= t.label(:password, 'Password') %>
+    <%= t.password_field(:password, class: 'form-control') %>
+
+    <%= t.label(:password_confirmation, 'Confirmation') %>
+    <%= t.password_field(:password_confirmation, class: 'form-control') %>
+
+    <%= t.submit('Create my account', class: "btn btn-primary") %>
+<% end %>

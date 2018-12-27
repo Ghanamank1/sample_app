@@ -17,7 +17,12 @@ module SessionsHelper
         @current_user = nil
     end
 
-     # Returns the current logged-in user (if any)
+    # Returns true if the given user is the current user.
+    def current_user?(user)
+        user == current_user
+    end
+
+    # Returns the current logged-in user (if any)
      def current_user 
         # first checks if the user is already logged in
         # if the user is logged in then it just assigns 
@@ -54,5 +59,15 @@ module SessionsHelper
         user.forget
         cookies.delete(:user_id)
         cookies.delete(:remember_token)
+    end
+
+    # Redirects to stored locaiton (or to the default).
+    def redirect_back_or(default)
+        redirect_to(session[:forwarding_url] || default)
+        session.delete(:forwarding_url)
+    end
+    
+    def store_location
+        session[:forwarding_url] = request.original_url if request.get?
     end
 end
