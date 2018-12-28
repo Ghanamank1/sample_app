@@ -4,11 +4,15 @@ class UsersController < ApplicationController
   before_action :admin_user,     only: :destroy
   
   def index
-    @users = User.paginate(page: params[:page])
+    # only showing users that are activated 
+    # in the index page i.e. /users path 
+    @users = User.where(activated: true).paginate(page: params[:page])
   end
 
   def show
     @user = User.find(params[:id])
+    # showing user profile only if they are activated
+    redirect_to root_path and return unless @user.activated?
   end
 
   def new
@@ -19,9 +23,15 @@ class UsersController < ApplicationController
     @user = User.new(user_params)
 
     if @user.save
-      log_in @user
-      flash[:success] = "Welcome to Sample App!"
-      redirect_to user_path(@user)
+      # sends an activation email and link
+      @user.send_activation_email # send method define in user model
+      flash[:info] = "Please check your email to activate your account"
+      redirect_to root_path
+
+      # BEFORE WE ADDED ACCOUNT ACTIVATION
+      # log_in @user
+      # flash[:success] = "Welcome to Sample App!"
+      # redirect_to user_path(@user)
     else
       render :new
     end
