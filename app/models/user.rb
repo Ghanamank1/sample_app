@@ -87,8 +87,7 @@ class User < ApplicationRecord
 
     # Returns true if a password reset has expired.
     def password_reset_expired?
-        self.reset_sent_at < (
-            self.reset_sent_at - 2.hours.from_now)
+        self.reset_sent_at < 2.hours.ago
     end
 
     private 
