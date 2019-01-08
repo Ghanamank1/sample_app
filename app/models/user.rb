@@ -2,7 +2,18 @@ class User < ApplicationRecord
     attr_accessor :remember_token, :activation_token, :reset_token
 
     has_many :microposts, dependent: :destroy
-
+    # active relationships
+    has_many :active_relationships, class_name: "Relationship",
+                                    foreign_key: "follower_id",
+                                    dependent: :destroy
+    has_many :following, through: :active_relationships, source: :followed
+    
+    # passive relationships
+    has_many :passive_relationships, class_name: "Relationship", 
+                                     foreign_key: "followed_id",
+                                     dependent: :destroy
+    has_many :followers, through: :passive_relationships, source: :follower
+    
     before_save   :downcase_email
     before_create :create_activation_digest
     
@@ -92,8 +103,47 @@ class User < ApplicationRecord
         self.reset_sent_at < 2.hours.ago
     end
 
+    # Returns a user's status feed. 
     def feed
-        Micropost.where(user_id: self.id)
+        # searches directly in the database and retrieves the info
+        # instead of storing in database after retrieving
+        following_ids = "SELECT followed_id FROM relationships
+                        WHERE follower_id = :user_id" 
+        # new feed, selects all posts from people that 
+        # current user is following
+        Micropost.where("user_id IN (#{following_ids}) OR user_id = :user_id", user_id: id)
+
+        # NOTE: this is the same as 
+                # not exactly the same but return a string of all
+                # the users none the less
+                # LOOK AT CHAPTER 14 FOR DETAILS (IN THE BOOK)
+        
+        # following_ids = current_user.following.map(|user| user.id)
+                
+        # Micropost.where("user_id IN (?) OR user_id = ?", self.following_ids, self.id)
+            # OR    (messy way)
+        # Micropost.where("user_id IN (?) OR user_id = ?", 
+                # current_user.following.map(|user| user.id), self.id)
+
+        # old feed just selected current users posts
+        #        Micropost.where(user_id: self.id)
+    end
+
+    # follows a user. 
+    def follow(other_user)
+        # same as self.following << other_user
+        following << other_user
+    end
+
+    # unfollows a user. 
+    def unfollow(other_user)
+        # same as self.following.delete(other_user)
+        following.delete(other_user)
+    end
+
+    # returns true if the current user is following the other user.
+    def following?(other_user)
+        following.include?(other_user)
     end
 
     private 

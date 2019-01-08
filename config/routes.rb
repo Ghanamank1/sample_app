@@ -14,7 +14,16 @@ Rails.application.routes.draw do
   post '/login',    to: 'sessions#create'
   delete '/logout', to: 'sessions#destroy'
 
+  resources :users do
+    # CHECK NOTES FOR DETAILS 
+    # requires the id to be specified
+    member do
+      get :following, :followers
+    end
+  end
+
   resources :account_activations, only: [:edit]
   resources :password_resets,     only: [:edit, :update, :new, :create]
   resources :microposts,          only: [:create, :destroy]
+  resources :relationships,       only: [:create, :destroy]
 end
